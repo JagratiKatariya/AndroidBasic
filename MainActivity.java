@@ -1,55 +1,49 @@
-package com.example.admin.intentapplication;
+package com.example.admin.captureimageapp;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
+import android.os.Bundle;
 import android.view.View;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.EditText;
+import android.widget.Button;
+import android.widget.ImageView;
 
 public class MainActivity extends AppCompatActivity {
 
+    static final int REQUEST_IMAGE_CAPTURE=1;
+    ImageView img;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(this,MyService.class);
-        startService(intent);
 
-    }
-    public void onclick1(View v)
-    {
-        Intent i=new Intent(this,MainActivityTwo.class);
-        final EditText ed1 = (EditText)findViewById(R.id.firstedit);
-        String Firsttext = ed1.getText().toString();
-        i.putExtra("MyMsg",Firsttext);
-
-        startActivity(i);
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        img =(ImageView)findViewById(R.id.img);
+        Button b1 =(Button)findViewById(R.id.but);
+        if(!hasCamera())
+        {
+            b1.setEnabled(false);
         }
 
-        return super.onOptionsItemSelected(item);
+    }
+    public boolean hasCamera()
+    {
+        return getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA_ANY);
+    }
+    public void captureButton(View v)
+    {
+        Intent intent=new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        startActivityForResult(intent,REQUEST_IMAGE_CAPTURE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode==REQUEST_IMAGE_CAPTURE &&  resultCode==RESULT_OK)
+        {
+            Bundle extras = data.getExtras();
+            Bitmap photo=(Bitmap) extras.get("data");
+            img.setImageBitmap(photo);
+        }
     }
 }
